@@ -1,9 +1,64 @@
+local validKey = "test1234"
+local player = game.Players.LocalPlayer
+local userInputService = game:GetService("UserInputService")
+local tweenService = game:GetService("TweenService")
+
+local screenGui = Instance.new("ScreenGui", game.CoreGui)
+local frame = Instance.new("Frame", screenGui)
+frame.Size = UDim2.new(0, 300, 0, 150)
+frame.Position = UDim2.new(0.5, -150, 0.5, -75)
+frame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+frame.BorderSizePixel = 0
+frame.Visible = true
+
+local title = Instance.new("TextLabel", frame)
+title.Size = UDim2.new(1, 0, 0, 30)
+title.Text = "ENTER THE KEY"
+title.TextColor3 = Color3.fromRGB(255, 255, 255)
+title.BackgroundTransparency = 1
+title.Font = Enum.Font.SourceSansBold
+title.TextSize = 20
+
+local textBox = Instance.new("TextBox", frame)
+textBox.Size = UDim2.new(0.8, 0, 0, 40)
+textBox.Position = UDim2.new(0.1, 0, 0.4, 0)
+textBox.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+textBox.TextColor3 = Color3.fromRGB(255, 255, 255)
+textBox.PlaceholderText = "Enter Key..."
+textBox.Font = Enum.Font.SourceSans
+textBox.TextSize = 18
+
+local submitButton = Instance.new("TextButton", frame)
+submitButton.Size = UDim2.new(0.5, 0, 0, 30)
+submitButton.Position = UDim2.new(0.25, 0, 0.75, 0)
+submitButton.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
+submitButton.Text = "Submit"
+submitButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+submitButton.Font = Enum.Font.SourceSansBold
+submitButton.TextSize = 18
+
+task.spawn(function()
+    vape:CreateNotification("Key Required", "Join .gg/icicle for the key!", 8, "warning")
+end)
+
+submitButton.MouseButton1Click:Connect(function()
+    if textBox.Text == validKey then
+        vape:CreateNotification("Access Granted", "Key Accepted!", 5, "info")
+        frame:Destroy()
+        finishLoading()
+    else
+        vape:CreateNotification("Access Denied", "Invalid Key! Check .gg/icicle", 5, "alert")
+    end
+end)
+
+while frame.Parent do task.wait() end
+
+
 repeat task.wait() until game:IsLoaded()
 if shared.vape then shared.vape:Uninject() end
 
 getgenv().getcustomasset = nil
 
--- why do exploits fail to implement anything correctly? Is it really that hard?
 if identifyexecutor then
 	if table.find({'Argon', 'Wave'}, ({identifyexecutor()})[1]) then
 		getgenv().setthreadidentity = nil
@@ -33,7 +88,7 @@ local playersService = cloneref(game:GetService('Players'))
 local function downloadFile(path, func)
 	if not isfile(path) then
 		local suc, res = pcall(function()
-			return game:HttpGet('https://raw.githubusercontent.com/wrealaero/AeroutV4/main/'..select(1, path:gsub('newvape/', '')), true)
+			return game:HttpGet('https://raw.githubusercontent.com/ImDamc/VapeV4Reborn/refs/heads/main/'..'/'..select(1, path:gsub('newvape/', '')), true)
 		end)
 		if not suc or res == '404: Not Found' then
 			error(res)
@@ -68,7 +123,7 @@ local function finishLoading()
 				if shared.VapeDeveloper then
 					loadstring(readfile('newvape/loader.lua'), 'loader')()
 				else
-					loadstring(game:HttpGet("https://raw.githubusercontent.com/wrealaero/AeroutV4/main/main.lua", true))()
+					loadstring(game:HttpGet("https://raw.githubusercontent.com/ImDamc/VapeV4Reborn/refs/heads/main/main.lua", true))()
 				end
 			]]
 			if shared.VapeDeveloper then
@@ -108,7 +163,7 @@ if not shared.VapeIndependent then
 	else
 		if not shared.VapeDeveloper then
 			local suc, res = pcall(function()
-				return game:HttpGet('https://raw.githubusercontent.com/wrealaero/AeroutV4'..readfile('newvape/profiles/commit.txt')..'/games/'..game.PlaceId..'.lua', true)
+				return game:HttpGet('https://raw.githubusercontent.com/ImDamc/VapeV4Reborn'..readfile('newvape/profiles/commit.txt')..'/games/'..game.PlaceId..'.lua', true)
 			end)
 			if suc and res ~= '404: Not Found' then
 				loadstring(downloadFile('newvape/games/'..game.PlaceId..'.lua'), tostring(game.PlaceId))(...)
