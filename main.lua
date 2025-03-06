@@ -76,7 +76,10 @@ local function checkKey()
         frame:Destroy() -- Remove the key GUI after successful input
         
         -- ✅ Load Vape only after key is verified
-        vape = loadstring(downloadFile('newvape/guis/'..gui..'.lua'), 'gui')()
+		print("[DEBUG] Downloading and loading Vape...") -- ✅ Shows if Vape is being loaded
+		vape = loadstring(downloadFile('newvape/guis/'..gui..'.lua'), 'gui')()
+		shared.vape = vape
+		finishLoading() -- Now it's safe to load Vape		
         shared.vape = vape
         finishLoading() -- Now it's safe to load Vape
     else
@@ -194,47 +197,48 @@ local function downloadFile(path, func)
 end
 
 local function finishLoading()
-	vape.Init = nil
-	vape:Load()
-	task.spawn(function()
-		repeat
-			vape:Save()
-			task.wait(10)
-		until not vape.Loaded
-	end)
+    print("[DEBUG] Running finishLoading()...") -- ✅ This will show in the developer console
+    
+    vape.Init = nil
+    vape:Load()
+    
+    task.spawn(function()
+        repeat
+            vape:Save()
+            task.wait(10)
+        until not vape.Loaded
+    end)
 
-	local teleportedServers
-	vape:Clean(playersService.LocalPlayer.OnTeleport:Connect(function()
-		if (not teleportedServers) and (not shared.VapeIndependent) then
-			teleportedServers = true
-			local teleportScript = [[
+    local teleportedServers
+    vape:Clean(playersService.LocalPlayer.OnTeleport:Connect(function()
+        if (not teleportedServers) and (not shared.VapeIndependent) then
+            teleportedServers = true
+            local teleportScript = [[
+                repeat task.wait() until game.HttpGet ~= nil
+                shared.vapereload = true
+                if shared.VapeDeveloper then
+                    loadstring(readfile('newvape/loader.lua'), 'loader')()
+                else
+                    loadstring(game:HttpGet("https://raw.githubusercontent.com/ImDamc/VapeV4Reborn/refs/heads/main/main.lua", true))()
+                end
+            ]]
+            if shared.VapeDeveloper then
+                teleportScript = 'shared.VapeDeveloper = true\n'..teleportScript
+            end
+            if shared.VapeCustomProfile then
+                teleportScript = 'shared.VapeCustomProfile = "'..shared.VapeCustomProfile..'"\n'..teleportScript
+            end
+            vape:Save()
+            queue_on_teleport(teleportScript)
+        end
+    end))
 
-				repeat task.wait() until game.HttpGet ~= nil
-
-				shared.vapereload = true
-				if shared.VapeDeveloper then
-					loadstring(readfile('newvape/loader.lua'), 'loader')()
-				else
-					loadstring(game:HttpGet("https://raw.githubusercontent.com/ImDamc/VapeV4Reborn/refs/heads/main/main.lua", true))()
-				end
-			]]
-			if shared.VapeDeveloper then
-				teleportScript = 'shared.VapeDeveloper = true\n'..teleportScript
-			end
-			if shared.VapeCustomProfile then
-				teleportScript = 'shared.VapeCustomProfile = "'..shared.VapeCustomProfile..'"\n'..teleportScript
-			end
-			vape:Save()
-			queue_on_teleport(teleportScript)
-		end
-	end))
-
-	if not shared.vapereload then
-		if not vape.Categories then return end
-		if vape.Categories.Main.Options['GUI bind indicator'].Enabled then
-			vape:CreateNotification('Finished Loading', vape.VapeButton and 'Press the button in the top right to open GUI' or 'Press '..table.concat(vape.Keybind, ' + '):upper()..' to open GUI', 5)
-		end
-	end
+    if not shared.vapereload then
+        if not vape.Categories then return end
+        if vape.Categories.Main.Options['GUI bind indicator'].Enabled then
+            vape:CreateNotification('Finished Loading', vape.VapeButton and 'Press the button in the top right to open GUI' or 'Press '..table.concat(vape.Keybind, ' + '):upper()..' to open GUI', 5)
+        end
+    end
 end
 
 if not isfolder('newvape/assets/'..gui) then
