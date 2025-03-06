@@ -1,54 +1,85 @@
-local validKey = "test1234"
+local validKey = "test1234" -- Change this to your daily key
+
 local player = game.Players.LocalPlayer
 local userInputService = game:GetService("UserInputService")
 local tweenService = game:GetService("TweenService")
 
+-- Create the ScreenGui
 local screenGui = Instance.new("ScreenGui", game.CoreGui)
-local frame = Instance.new("Frame", screenGui)
-frame.Size = UDim2.new(0, 300, 0, 150)
-frame.Position = UDim2.new(0.5, -150, 0.5, -75)
-frame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-frame.BorderSizePixel = 0
-frame.Visible = true
+screenGui.Name = "KeyInputGUI"
+screenGui.ResetOnSpawn = false
 
+-- Main Frame
+local frame = Instance.new("Frame", screenGui)
+frame.Size = UDim2.new(0, 350, 0, 180)
+frame.Position = UDim2.new(0.5, -175, 0.4, -90)
+frame.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+frame.BorderSizePixel = 3
+frame.BorderColor3 = Color3.fromRGB(255, 165, 0) -- Orange border for style
+frame.Visible = true
+frame.AnchorPoint = Vector2.new(0.5, 0.5)
+
+-- Title Label
 local title = Instance.new("TextLabel", frame)
-title.Size = UDim2.new(1, 0, 0, 30)
-title.Text = "ENTER THE KEY"
+title.Size = UDim2.new(1, 0, 0, 40)
+title.Text = "🔑 ENTER THE KEY"
 title.TextColor3 = Color3.fromRGB(255, 255, 255)
 title.BackgroundTransparency = 1
-title.Font = Enum.Font.SourceSansBold
-title.TextSize = 20
+title.Font = Enum.Font.GothamBold
+title.TextSize = 22
 
+-- Input TextBox
 local textBox = Instance.new("TextBox", frame)
 textBox.Size = UDim2.new(0.8, 0, 0, 40)
-textBox.Position = UDim2.new(0.1, 0, 0.4, 0)
+textBox.Position = UDim2.new(0.1, 0, 0.35, 0)
 textBox.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
 textBox.TextColor3 = Color3.fromRGB(255, 255, 255)
 textBox.PlaceholderText = "Enter Key..."
-textBox.Font = Enum.Font.SourceSans
+textBox.Font = Enum.Font.Gotham
 textBox.TextSize = 18
+textBox.ClearTextOnFocus = true
 
+-- Submit Button
 local submitButton = Instance.new("TextButton", frame)
-submitButton.Size = UDim2.new(0.5, 0, 0, 30)
-submitButton.Position = UDim2.new(0.25, 0, 0.75, 0)
-submitButton.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
+submitButton.Size = UDim2.new(0.6, 0, 0, 40)
+submitButton.Position = UDim2.new(0.2, 0, 0.65, 0)
+submitButton.BackgroundColor3 = Color3.fromRGB(0, 120, 255)
 submitButton.Text = "Submit"
 submitButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-submitButton.Font = Enum.Font.SourceSansBold
-submitButton.TextSize = 18
+submitButton.Font = Enum.Font.GothamBold
+submitButton.TextSize = 20
 
-task.spawn(function()
-    vape:CreateNotification("Key Required", "Join .gg/icicle for the key!", 8, "warning")
+-- Function to handle key checking
+local function checkKey()
+    if textBox.Text == validKey then
+        vape:CreateNotification("✅ Access Granted", "Key Accepted!", 5, "info")
+        frame:Destroy()
+        finishLoading() -- Run your script after successful verification
+    else
+        vape:CreateNotification("❌ Access Denied", "Incorrect key! Join .gg/icicle for the key!", 5, "alert")
+        textBox.Text = "" -- Clear the text box for retry
+    end
+end
+
+-- Click submit button
+submitButton.MouseButton1Click:Connect(checkKey)
+
+-- Allow Enter key to submit
+userInputService.InputBegan:Connect(function(input, gameProcessed)
+    if not gameProcessed and input.KeyCode == Enum.KeyCode.Return then
+        checkKey()
+    end
 end)
 
-submitButton.MouseButton1Click:Connect(function()
-    if textBox.Text == validKey then
-        vape:CreateNotification("Access Granted", "Key Accepted!", 5, "info")
-        frame:Destroy()
-        finishLoading()
-    else
-        vape:CreateNotification("Access Denied", "Invalid Key! Check .gg/icicle", 5, "alert")
-    end
+-- Animate the GUI
+local tweenInfo = TweenInfo.new(0.5, Enum.EasingStyle.Quint, Enum.EasingDirection.Out)
+local goal = {Size = UDim2.new(0, 350, 0, 180), Position = UDim2.new(0.5, -175, 0.4, -90)}
+local tween = tweenService:Create(frame, tweenInfo, goal)
+tween:Play()
+
+-- Send the initial notification to join Discord for the key
+task.spawn(function()
+    vape:CreateNotification("🔑 Key Required", "Join .gg/icicle for the key!", 8, "warning")
 end)
 
 while frame.Parent do task.wait() end
