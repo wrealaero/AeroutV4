@@ -1,215 +1,176 @@
--- Ensure the game is loaded
-repeat
-    task.wait()
-until game:IsLoaded()
-
-if shared.vape then
-    shared.vape:Uninject()
-end
+repeat task.wait() until game:IsLoaded()
+if shared.vape then shared.vape:Uninject() end
 
 getgenv().getcustomasset = nil
 
 if identifyexecutor then
-    if table.find({'Argon', 'Wave'}, ({identifyexecutor()})[1]) then
-        getgenv().setthreadidentity = nil
-    end
+	if table.find({'Argon', 'Wave'}, ({identifyexecutor()})[1]) then
+		getgenv().setthreadidentity = nil
+	end
 end
 
 local vape
 local loadstring = function(...)
-    local res, err = loadstring(...)
-    if err and vape then
-        vape:CreateNotification('Vape', 'Failed to load : '..err, 30, 'alert')
-    end
-    return res
+	local res, err = loadstring(...)
+	if err and vape then
+		vape:CreateNotification('Vape', 'Failed to load : '..err, 30, 'alert')
+	end
+	return res
 end
 local queue_on_teleport = queue_on_teleport or function() end
 local isfile = isfile or function(file)
-    local suc, res = pcall(function()
-        return readfile(file)
-    end)
-    return suc and res ~= nil and res ~= ''
+	local suc, res = pcall(function()
+		return readfile(file)
+	end)
+	return suc and res ~= nil and res ~= ''
 end
 local cloneref = cloneref or function(obj)
-    return obj
+	return obj
 end
 local playersService = cloneref(game:GetService('Players'))
 
 local function downloadFile(path, func)
-    if not isfile(path) then
-        local suc, res = pcall(function()
-            return game:HttpGet('https://raw.githubusercontent.com/wrealaero/AeroutV4/refs/heads/main/'..'/'..select(1, path:gsub('newvape/', '')), true)
-        end)
-        if not suc or res == '404: Not Found' then
-            error(res)
-        end
-        if path:find('.lua') then
-            res = '--This watermark is used to delete the file if its cached, remove it to make the file persist after vape updates.\n'..res
-        end
-        writefile(path, res)
-    end
-    return (func or readfile)(path)
+	if not isfile(path) then
+		local suc, res = pcall(function()
+			return game:HttpGet('https://raw.githubusercontent.com/ImDamc/VapeV4Reborn/refs/heads/main/'..'/'..select(1, path:gsub('newvape/', '')), true)
+		end)
+		if not suc or res == '404: Not Found' then
+			error(res)
+		end
+		if path:find('.lua') then
+			res = '--This watermark is used to delete the file if its cached, remove it to make the file persist after vape updates.\n'..res
+		end
+		writefile(path, res)
+	end
+	return (func or readfile)(path)
 end
 
 local function finishLoading()
-    vape.Init = nil
-    vape:Load()
-    task.spawn(function()
-        repeat
-            vape:Save()
-            task.wait(10)
-        until not vape.Loaded
-    end)
+	vape.Init = nil
+	vape:Load()
+	task.spawn(function()
+		repeat
+			vape:Save()
+			task.wait(10)
+		until not vape.Loaded
+	end)
 
-    local teleportedServers
-    vape:Clean(playersService.LocalPlayer.OnTeleport:Connect(function()
-        if (not teleportedServers) and (not shared.VapeIndependent) then
-            teleportedServers = true
-            local teleportScript = [[
-                repeat task.wait() until game.HttpGet ~= nil
-                shared.vapereload = true
-                if shared.VapeDeveloper then
-                    loadstring(readfile('newvape/loader.lua'), 'loader')()
-                else
-                    loadstring(game:HttpGet("https://raw.githubusercontent.com/wrealaero/AeroutV4/refs/heads/main/main.lua", true))()
-                end
-            ]]
-            if shared.VapeDeveloper then
-                teleportScript = 'shared.VapeDeveloper = true\n'..teleportScript
-            end
-            if shared.VapeCustomProfile then
-                teleportScript = 'shared.VapeCustomProfile = "'..shared.VapeCustomProfile..'"\n'..teleportScript
-            end
-            vape:Save()
-            queue_on_teleport(teleportScript)
-        end
-    end))
+	local teleportedServers
+	vape:Clean(playersService.LocalPlayer.OnTeleport:Connect(function()
+		if (not teleportedServers) and (not shared.VapeIndependent) then
+			teleportedServers = true
+			local teleportScript = [[
 
-    if not isfile('newvape/profiles/gui.txt') then
-        writefile('newvape/profiles/gui.txt', 'new')
-    end
-    local gui = readfile('newvape/profiles/gui.txt')
+				repeat task.wait() until game.HttpGet ~= nil
 
-    if not isfolder('newvape/assets/'..gui) then
-        makefolder('newvape/assets/'..gui)
-    end
-    vape = loadstring(downloadFile('newvape/guis/'..gui..'.lua'), 'gui')()
-    shared.vape = vape
+				shared.vapereload = true
+				if shared.VapeDeveloper then
+					loadstring(readfile('newvape/loader.lua'), 'loader')()
+				else
+					loadstring(game:HttpGet("https://raw.githubusercontent.com/ImDamc/VapeV4Reborn/refs/heads/main/main.lua", true))()
+				end
+			]]
+			if shared.VapeDeveloper then
+				teleportScript = 'shared.VapeDeveloper = true\n'..teleportScript
+			end
+			if shared.VapeCustomProfile then
+				teleportScript = 'shared.VapeCustomProfile = "'..shared.VapeCustomProfile..'"\n'..teleportScript
+			end
+			vape:Save()
+			queue_on_teleport(teleportScript)
+		end
+	end))
 
-    if not shared.VapeIndependent then
-        loadstring(downloadFile('newvape/games/universal.lua'), 'universal')()
-        if isfile('newvape/games/'..game.PlaceId..'.lua') then
-            loadstring(readfile('newvape/games/'..game.PlaceId..'.lua'), tostring(game.PlaceId))(...)
-        else
-            if not shared.VapeDeveloper then
-                local suc, res = pcall(function()
-                    return game:HttpGet('https://raw.githubusercontent.com/wrealaero/AeroutV4'..readfile('newvape/profiles/commit.txt')..'/games/'..game.PlaceId..'.lua', true)
-                end)
-                if suc and res ~= '404: Not Found' then
-                    loadstring(downloadFile('newvape/games/'..game.PlaceId..'.lua'), tostring(game.PlaceId))(...)
-                end
-            end
-        end
-        finishLoading()
-    else
-        vape.Init = finishLoading
-        return vape
-    end
+	if not shared.vapereload then
+		if not vape.Categories then return end
+		if vape.Categories.Main.Options['GUI bind indicator'].Enabled then
+			vape:CreateNotification('Finished Loading', vape.VapeButton and 'Press the button in the top right to open GUI' or 'Press '..table.concat(vape.Keybind, ' + '):upper()..' to open GUI', 5)
+		end
+	end
 end
 
--- Key Input UI Logic
+if not isfile('newvape/profiles/gui.txt') then
+	writefile('newvape/profiles/gui.txt', 'new')
+end
+local gui = readfile('newvape/profiles/gui.txt')
+
+if not isfolder('newvape/assets/'..gui) then
+	makefolder('newvape/assets/'..gui)
+end
+vape = loadstring(downloadFile('newvape/guis/'..gui..'.lua'), 'gui')()
+shared.vape = vape
+
+if not shared.VapeIndependent then
+	loadstring(downloadFile('newvape/games/universal.lua'), 'universal')()
+	if isfile('newvape/games/'..game.PlaceId..'.lua') then
+		loadstring(readfile('newvape/games/'..game.PlaceId..'.lua'), tostring(game.PlaceId))(...)
+	else
+		if not shared.VapeDeveloper then
+			local suc, res = pcall(function()
+				return game:HttpGet('https://raw.githubusercontent.com/ImDamc/VapeV4Reborn'..readfile('newvape/profiles/commit.txt')..'/games/'..game.PlaceId..'.lua', true)
+			end)
+			if suc and res ~= '404: Not Found' then
+				loadstring(downloadFile('newvape/games/'..game.PlaceId..'.lua'), tostring(game.PlaceId))(...)
+			end
+		end
+	end
+	finishLoading()
+else
+	vape.Init = finishLoading
+	return vape
+end
+
 local validKey = "test1234"
 local player = game.Players.LocalPlayer
 local userInputService = game:GetService("UserInputService")
 local tweenService = game:GetService("TweenService")
 
--- Create GUI components
 local screenGui = Instance.new("ScreenGui", game.CoreGui)
-screenGui.Name = "KeyInputGUI"
-screenGui.ResetOnSpawn = false
-
 local frame = Instance.new("Frame", screenGui)
-frame.Size = UDim2.new(0, 400, 0, 200)
-frame.Position = UDim2.new(0.5, -200, 0.5, -100)
-frame.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
-frame.BorderSizePixel = 6
-frame.BorderColor3 = Color3.fromRGB(255, 165, 0)
+frame.Size = UDim2.new(0, 300, 0, 150)
+frame.Position = UDim2.new(0.5, -150, 0.5, -75)
+frame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+frame.BorderSizePixel = 0
 frame.Visible = true
-frame.AnchorPoint = Vector2.new(0.5, 0.5)
 
 local title = Instance.new("TextLabel", frame)
-title.Size = UDim2.new(1, 0, 0, 40)
+title.Size = UDim2.new(1, 0, 0, 30)
 title.Text = "ENTER THE KEY"
 title.TextColor3 = Color3.fromRGB(255, 255, 255)
 title.BackgroundTransparency = 1
-title.Font = Enum.Font.GothamBold
-title.TextSize = 24
-title.TextStrokeTransparency = 0.6
-title.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
+title.Font = Enum.Font.SourceSansBold
+title.TextSize = 20
 
 local textBox = Instance.new("TextBox", frame)
 textBox.Size = UDim2.new(0.8, 0, 0, 40)
-textBox.Position = UDim2.new(0.1, 0, 0.3, 0)
+textBox.Position = UDim2.new(0.1, 0, 0.4, 0)
 textBox.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
 textBox.TextColor3 = Color3.fromRGB(255, 255, 255)
 textBox.PlaceholderText = "Enter Key..."
-textBox.Font = Enum.Font.Gotham
+textBox.Font = Enum.Font.SourceSans
 textBox.TextSize = 18
-textBox.TextStrokeTransparency = 0.6
-textBox.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
-textBox.ClearTextOnFocus = true
 
 local submitButton = Instance.new("TextButton", frame)
-submitButton.Size = UDim2.new(0.6, 0, 0, 40)
-submitButton.Position = UDim2.new(0.2, 0, 0.7, 0)
-submitButton.BackgroundColor3 = Color3.fromRGB(0, 120, 255)
+submitButton.Size = UDim2.new(0.5, 0, 0, 30)
+submitButton.Position = UDim2.new(0.25, 0, 0.75, 0)
+submitButton.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
 submitButton.Text = "Submit"
 submitButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-submitButton.Font = Enum.Font.GothamBold
-submitButton.TextSize = 20
-submitButton.TextStrokeTransparency = 0.5
-submitButton.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
-
-local feedbackLabel = Instance.new("TextLabel", frame)
-feedbackLabel.Size = UDim2.new(1, 0, 0, 30)
-feedbackLabel.Position = UDim2.new(0, 0, 0.85, 0)
-feedbackLabel.Text = ""
-feedbackLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-feedbackLabel.BackgroundTransparency = 1
-feedbackLabel.Font = Enum.Font.Gotham
-feedbackLabel.TextSize = 16
-feedbackLabel.TextStrokeTransparency = 0.6
-feedbackLabel.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
-
-local tweenInfo = TweenInfo.new(0.5, Enum.EasingStyle.Quint, Enum.EasingDirection.Out)
-local goal = {Size = UDim2.new(0, 400, 0, 200), Position = UDim2.new(0.5, -200, 0.5, -100)}
-local tween = tweenService:Create(frame, tweenInfo, goal)
-tween:Play()
-
-submitButton.MouseButton1Click:Connect(function()
-    if textBox.Text == validKey then
-        feedbackLabel.Text = "Access Granted! Key Accepted!"
-        feedbackLabel.TextColor3 = Color3.fromRGB(0, 255, 0)
-        feedbackLabel.TextStrokeTransparency = 0.2
-        frame.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-        frame.BorderColor3 = Color3.fromRGB(0, 255, 0)
-
-        task.wait(1)
-        frame:Destroy()
-        finishLoading()
-    else
-        feedbackLabel.Text = "Invalid Key! Try again."
-        feedbackLabel.TextColor3 = Color3.fromRGB(255, 0, 0)
-        feedbackLabel.TextStrokeTransparency = 0.2
-        frame.BackgroundColor3 = Color3.fromRGB(80, 40, 40)
-        frame.BorderColor3 = Color3.fromRGB(255, 0, 0)
-    end
-end)
+submitButton.Font = Enum.Font.SourceSansBold
+submitButton.TextSize = 18
 
 task.spawn(function()
     vape:CreateNotification("Key Required", "Join .gg/icicle for the key!", 8, "warning")
 end)
 
-while frame.Parent do
-    task.wait()
-end
+submitButton.MouseButton1Click:Connect(function()
+    if textBox.Text == validKey then
+        vape:CreateNotification("Access Granted", "Key Accepted!", 5, "info")
+        frame:Destroy()
+        finishLoading()
+    else
+        vape:CreateNotification("Access Denied", "Invalid Key! Check .gg/icicle", 5, "alert")
+    end
+end)
+
+while frame.Parent do task.wait() end
