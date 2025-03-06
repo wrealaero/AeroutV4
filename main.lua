@@ -81,14 +81,6 @@ local function finishLoading()
 		end
 	end))
 
-	if not shared.vapereload then
-		if not vape.Categories then return end
-		if vape.Categories.Main.Options['GUI bind indicator'].Enabled then
-			vape:CreateNotification('Finished Loading', vape.VapeButton and 'Press the button in the top right to open GUI' or 'Press '..table.concat(vape.Keybind, ' + '):upper()..' to open GUI', 5)
-		end
-	end
-end
-
 if not isfile('newvape/profiles/gui.txt') then
 	writefile('newvape/profiles/gui.txt', 'new')
 end
@@ -120,57 +112,107 @@ else
 	return vape
 end
 
+-- Define key variables
 local validKey = "test1234"
 local player = game.Players.LocalPlayer
 local userInputService = game:GetService("UserInputService")
 local tweenService = game:GetService("TweenService")
 
+-- Create GUI components
 local screenGui = Instance.new("ScreenGui", game.CoreGui)
+screenGui.Name = "KeyInputGUI"
+screenGui.ResetOnSpawn = false  -- Prevent the GUI from resetting on respawn
+
 local frame = Instance.new("Frame", screenGui)
-frame.Size = UDim2.new(0, 300, 0, 150)
-frame.Position = UDim2.new(0.5, -150, 0.5, -75)
-frame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-frame.BorderSizePixel = 0
+frame.Size = UDim2.new(0, 400, 0, 200)
+frame.Position = UDim2.new(0.5, -200, 0.5, -100)
+frame.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+frame.BorderSizePixel = 6
+frame.BorderColor3 = Color3.fromRGB(255, 165, 0)  -- Orange border for a nice highlight effect
 frame.Visible = true
+frame.AnchorPoint = Vector2.new(0.5, 0.5)
 
 local title = Instance.new("TextLabel", frame)
-title.Size = UDim2.new(1, 0, 0, 30)
+title.Size = UDim2.new(1, 0, 0, 40)
 title.Text = "ENTER THE KEY"
 title.TextColor3 = Color3.fromRGB(255, 255, 255)
 title.BackgroundTransparency = 1
-title.Font = Enum.Font.SourceSansBold
-title.TextSize = 20
+title.Font = Enum.Font.GothamBold
+title.TextSize = 24
+title.TextStrokeTransparency = 0.6
+title.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
 
 local textBox = Instance.new("TextBox", frame)
 textBox.Size = UDim2.new(0.8, 0, 0, 40)
-textBox.Position = UDim2.new(0.1, 0, 0.4, 0)
+textBox.Position = UDim2.new(0.1, 0, 0.3, 0)
 textBox.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
 textBox.TextColor3 = Color3.fromRGB(255, 255, 255)
 textBox.PlaceholderText = "Enter Key..."
-textBox.Font = Enum.Font.SourceSans
+textBox.Font = Enum.Font.Gotham
 textBox.TextSize = 18
+textBox.TextStrokeTransparency = 0.6
+textBox.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
+textBox.ClearTextOnFocus = true
 
 local submitButton = Instance.new("TextButton", frame)
-submitButton.Size = UDim2.new(0.5, 0, 0, 30)
-submitButton.Position = UDim2.new(0.25, 0, 0.75, 0)
-submitButton.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
+submitButton.Size = UDim2.new(0.6, 0, 0, 40)
+submitButton.Position = UDim2.new(0.2, 0, 0.7, 0)
+submitButton.BackgroundColor3 = Color3.fromRGB(0, 120, 255)  -- A vibrant blue color for the button
 submitButton.Text = "Submit"
 submitButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-submitButton.Font = Enum.Font.SourceSansBold
-submitButton.TextSize = 18
+submitButton.Font = Enum.Font.GothamBold
+submitButton.TextSize = 20
+submitButton.TextStrokeTransparency = 0.5
+submitButton.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
 
+-- Add visual feedback for key input
+local feedbackLabel = Instance.new("TextLabel", frame)
+feedbackLabel.Size = UDim2.new(1, 0, 0, 30)
+feedbackLabel.Position = UDim2.new(0, 0, 0.85, 0)
+feedbackLabel.Text = ""
+feedbackLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+feedbackLabel.BackgroundTransparency = 1
+feedbackLabel.Font = Enum.Font.Gotham
+feedbackLabel.TextSize = 16
+feedbackLabel.TextStrokeTransparency = 0.6
+feedbackLabel.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
+
+-- Animation to make the frame appear smoothly
+local tweenInfo = TweenInfo.new(0.5, Enum.EasingStyle.Quint, Enum.EasingDirection.Out)
+local goal = {Size = UDim2.new(0, 400, 0, 200), Position = UDim2.new(0.5, -200, 0.5, -100)}
+local tween = tweenService:Create(frame, tweenInfo, goal)
+tween:Play()
+
+-- Function to check the entered key and give feedback
+submitButton.MouseButton1Click:Connect(function()
+    if textBox.Text == validKey then
+        -- Correct key logic
+        feedbackLabel.Text = "Access Granted! Key Accepted!"
+        feedbackLabel.TextColor3 = Color3.fromRGB(0, 255, 0)  -- Green color for success
+        feedbackLabel.TextStrokeTransparency = 0.2
+        frame.BackgroundColor3 = Color3.fromRGB(50, 50, 50)  -- Optionally change frame color on success
+        frame.BorderColor3 = Color3.fromRGB(0, 255, 0)  -- Green border to indicate success
+
+        -- Animation or actions after key validation
+        task.wait(1)  -- Brief delay before finishing
+        frame:Destroy()  -- Destroy frame after key is accepted
+        finishLoading()  -- Call the function to load the rest of the script
+    else
+        -- Incorrect key logic
+        feedbackLabel.Text = "Invalid Key! Try again."
+        feedbackLabel.TextColor3 = Color3.fromRGB(255, 0, 0)  -- Red color for failure
+        feedbackLabel.TextStrokeTransparency = 0.2
+        frame.BackgroundColor3 = Color3.fromRGB(80, 40, 40)  -- Red background on failure
+        frame.BorderColor3 = Color3.fromRGB(255, 0, 0)  -- Red border to indicate failure
+    end
+end)
+
+-- Notify the player with instructions when the GUI loads
 task.spawn(function()
     vape:CreateNotification("Key Required", "Join .gg/icicle for the key!", 8, "warning")
 end)
 
-submitButton.MouseButton1Click:Connect(function()
-    if textBox.Text == validKey then
-        vape:CreateNotification("Access Granted", "Key Accepted!", 5, "info")
-        frame:Destroy()
-        finishLoading()
-    else
-        vape:CreateNotification("Access Denied", "Invalid Key! Check .gg/icicle", 5, "alert")
-    end
-end)
-
-while frame.Parent do task.wait() end
+-- Make sure the frame stays visible until the player interacts with it
+while frame.Parent do
+    task.wait()
+end
