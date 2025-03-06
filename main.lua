@@ -38,7 +38,7 @@ local playersService = cloneref(game:GetService('Players'))
 local function downloadFile(path, func)
     if not isfile(path) then
         local suc, res = pcall(function()
-            return game:HttpGet('https://raw.githubusercontent.com/wrealaero/AeroutV4/refs/heads/main/'..'/'..select(1, path:gsub('newvape/', '')), true)
+            return game:HttpGet('https://raw.githubusercontent.com/wrealaero/AeroutV4/main/'..select(1, path:gsub('newvape/', '')), true)
         end)
         if not suc or res == '404: Not Found' then
             error(res)
@@ -90,9 +90,11 @@ local function finishLoading()
     end
     local gui = readfile('newvape/profiles/gui.txt')
 
-    if not isfolder('newvape/assets/'..gui) then
-        makefolder('newvape/assets/'..gui)
-    end
+	if not isfolder("newvape") then makefolder("newvape") end
+	if not isfolder("newvape/games") then makefolder("newvape/games") end
+	if not isfolder("newvape/guis") then makefolder("newvape/guis") end
+	if not isfolder("newvape/libraries") then makefolder("newvape/libraries") end
+		
     vape = loadstring(downloadFile('newvape/guis/'..gui..'.lua'), 'gui')()
     shared.vape = vape
 
@@ -102,12 +104,14 @@ local function finishLoading()
             loadstring(readfile('newvape/games/'..game.PlaceId..'.lua'), tostring(game.PlaceId))(...)
         else
             if not shared.VapeDeveloper then
-                local suc, res = pcall(function()
-                    return game:HttpGet('https://raw.githubusercontent.com/wrealaero/AeroutV4'..readfile('newvape/profiles/commit.txt')..'/games/'..game.PlaceId..'.lua', true)
-                end)
-                if suc and res ~= '404: Not Found' then
-                    loadstring(downloadFile('newvape/games/'..game.PlaceId..'.lua'), tostring(game.PlaceId))(...)
-                end
+				local suc, res = pcall(function()
+					return game:HttpGet('https://raw.githubusercontent.com/wrealaero/AeroutV4/main/'..path:gsub('newvape/', ''), true)
+				end)
+				
+				if not suc or res == '404: Not Found' then
+					warn("Failed to download:", res)
+					return
+				end				
             end
         end
         finishLoading()
