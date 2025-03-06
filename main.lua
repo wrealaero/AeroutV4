@@ -1,6 +1,12 @@
 shared.vape = nil -- Prevent Vape from loading before key verification
 repeat task.wait() until game:IsLoaded() -- Ensure the game is fully loaded
 
+if not isfile('newvape/profiles/gui.txt') then
+	writefile('newvape/profiles/gui.txt', 'new')
+end
+local gui = readfile('newvape/profiles/gui.txt') -- ✅ Defined before Vape loads
+
+
 local validKey = "test1234" -- Change this to your daily key
 
 local player = game.Players.LocalPlayer
@@ -230,11 +236,6 @@ local function finishLoading()
 		end
 	end
 end
-
-if not isfile('newvape/profiles/gui.txt') then
-	writefile('newvape/profiles/gui.txt', 'new')
-end
-local gui = readfile('newvape/profiles/gui.txt')
 
 if not isfolder('newvape/assets/'..gui) then
 	makefolder('newvape/assets/'..gui)
