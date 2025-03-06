@@ -132,7 +132,6 @@ tween:Play()
 repeat task.wait() until game:IsLoaded()
 if shared.vape then shared.vape:Uninject() end
 
-getgenv().getcustomasset = nil
 
 if identifyexecutor then
 	if table.find({'Argon', 'Wave'}, ({identifyexecutor()})[1]) then
