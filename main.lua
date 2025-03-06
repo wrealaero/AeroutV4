@@ -1,3 +1,58 @@
+local validKey = "test1234"
+local player = game.Players.LocalPlayer
+local userInputService = game:GetService("UserInputService")
+local tweenService = game:GetService("TweenService")
+
+local screenGui = Instance.new("ScreenGui", game.CoreGui)
+local frame = Instance.new("Frame", screenGui)
+frame.Size = UDim2.new(0, 300, 0, 150)
+frame.Position = UDim2.new(0.5, -150, 0.5, -75)
+frame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+frame.BorderSizePixel = 0
+frame.Visible = true
+
+local title = Instance.new("TextLabel", frame)
+title.Size = UDim2.new(1, 0, 0, 30)
+title.Text = "ENTER THE KEY"
+title.TextColor3 = Color3.fromRGB(255, 255, 255)
+title.BackgroundTransparency = 1
+title.Font = Enum.Font.SourceSansBold
+title.TextSize = 20
+
+local textBox = Instance.new("TextBox", frame)
+textBox.Size = UDim2.new(0.8, 0, 0, 40)
+textBox.Position = UDim2.new(0.1, 0, 0.4, 0)
+textBox.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+textBox.TextColor3 = Color3.fromRGB(255, 255, 255)
+textBox.PlaceholderText = "Enter Key..."
+textBox.Font = Enum.Font.SourceSans
+textBox.TextSize = 18
+
+local submitButton = Instance.new("TextButton", frame)
+submitButton.Size = UDim2.new(0.5, 0, 0, 30)
+submitButton.Position = UDim2.new(0.25, 0, 0.75, 0)
+submitButton.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
+submitButton.Text = "Submit"
+submitButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+submitButton.Font = Enum.Font.SourceSansBold
+submitButton.TextSize = 18
+
+task.spawn(function()
+    vape:CreateNotification("Key Required", "Join .gg/icicle for the key!", 8, "warning")
+end)
+
+submitButton.MouseButton1Click:Connect(function()
+    if textBox.Text == validKey then
+        vape:CreateNotification("Access Granted", "Key Accepted!", 5, "info")
+        frame:Destroy()
+        finishLoading()
+    else
+        vape:CreateNotification("Access Denied", "Invalid Key! Check .gg/icicle", 5, "alert")
+    end
+end)
+
+while frame.Parent do task.wait() end
+
 repeat task.wait() until game:IsLoaded()
 if shared.vape then shared.vape:Uninject() end
 
@@ -119,58 +174,3 @@ else
 	vape.Init = finishLoading
 	return vape
 end
-
-local validKey = "test1234"
-local player = game.Players.LocalPlayer
-local userInputService = game:GetService("UserInputService")
-local tweenService = game:GetService("TweenService")
-
-local screenGui = Instance.new("ScreenGui", game.CoreGui)
-local frame = Instance.new("Frame", screenGui)
-frame.Size = UDim2.new(0, 300, 0, 150)
-frame.Position = UDim2.new(0.5, -150, 0.5, -75)
-frame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-frame.BorderSizePixel = 0
-frame.Visible = true
-
-local title = Instance.new("TextLabel", frame)
-title.Size = UDim2.new(1, 0, 0, 30)
-title.Text = "ENTER THE KEY"
-title.TextColor3 = Color3.fromRGB(255, 255, 255)
-title.BackgroundTransparency = 1
-title.Font = Enum.Font.SourceSansBold
-title.TextSize = 20
-
-local textBox = Instance.new("TextBox", frame)
-textBox.Size = UDim2.new(0.8, 0, 0, 40)
-textBox.Position = UDim2.new(0.1, 0, 0.4, 0)
-textBox.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-textBox.TextColor3 = Color3.fromRGB(255, 255, 255)
-textBox.PlaceholderText = "Enter Key..."
-textBox.Font = Enum.Font.SourceSans
-textBox.TextSize = 18
-
-local submitButton = Instance.new("TextButton", frame)
-submitButton.Size = UDim2.new(0.5, 0, 0, 30)
-submitButton.Position = UDim2.new(0.25, 0, 0.75, 0)
-submitButton.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
-submitButton.Text = "Submit"
-submitButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-submitButton.Font = Enum.Font.SourceSansBold
-submitButton.TextSize = 18
-
-task.spawn(function()
-    vape:CreateNotification("Key Required", "Join .gg/icicle for the key!", 8, "warning")
-end)
-
-submitButton.MouseButton1Click:Connect(function()
-    if textBox.Text == validKey then
-        vape:CreateNotification("Access Granted", "Key Accepted!", 5, "info")
-        frame:Destroy()
-        finishLoading()
-    else
-        vape:CreateNotification("Access Denied", "Invalid Key! Check .gg/icicle", 5, "alert")
-    end
-end)
-
-while frame.Parent do task.wait() end
