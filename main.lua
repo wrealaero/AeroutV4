@@ -15,9 +15,11 @@ frame.Size = UDim2.new(0, 350, 0, 180)
 frame.Position = UDim2.new(0.5, -175, 0.4, -90)
 frame.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
 frame.BorderSizePixel = 3
-frame.BorderColor3 = Color3.fromRGB(255, 165, 0) -- Orange border for style
+frame.BorderColor3 = Color3.fromRGB(255, 165, 0) -- Orange border
 frame.Visible = true
 frame.AnchorPoint = Vector2.new(0.5, 0.5)
+frame.Active = true -- Enable dragging
+frame.Draggable = true -- Make GUI draggable
 
 -- Title Label
 local title = Instance.new("TextLabel", frame)
@@ -52,11 +54,19 @@ submitButton.TextSize = 20
 -- Function to handle key checking
 local function checkKey()
     if textBox.Text == validKey then
-        vape:CreateNotification("✅ Access Granted", "Key Accepted!", 5, "info")
-        frame:Destroy()
+        game:GetService("StarterGui"):SetCore("SendNotification", {
+            Title = "✅ Access Granted";
+            Text = "Key Accepted!";
+            Duration = 5;
+        })
+        frame:Destroy() -- Remove the key GUI after successful input
         finishLoading() -- Run your script after successful verification
     else
-        vape:CreateNotification("❌ Access Denied", "Incorrect key! Join .gg/icicle for the key!", 5, "alert")
+        game:GetService("StarterGui"):SetCore("SendNotification", {
+            Title = "❌ Access Denied";
+            Text = "Incorrect key! Join .gg/icicle for the key!";
+            Duration = 5;
+        })
         textBox.Text = "" -- Clear the text box for retry
     end
 end
@@ -71,18 +81,53 @@ userInputService.InputBegan:Connect(function(input, gameProcessed)
     end
 end)
 
--- Animate the GUI
+-- GUI Dragging
+local dragging
+local dragInput
+local dragStart
+local startPos
+
+frame.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 then
+        dragging = true
+        dragStart = input.Position
+        startPos = frame.Position
+        
+        input.Changed:Connect(function()
+            if input.UserInputState == Enum.UserInputState.End then
+                dragging = false
+            end
+        end)
+    end
+end)
+
+frame.InputChanged:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseMovement then
+        dragInput = input
+    end
+end)
+
+userInputService.InputChanged:Connect(function(input)
+    if input == dragInput and dragging then
+        local delta = input.Position - dragStart
+        frame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+    end
+end)
+
+-- Send the initial notification to join Discord for the key
+task.spawn(function()
+    game:GetService("StarterGui"):SetCore("SendNotification", {
+        Title = "🔑 Key Required";
+        Text = "Join .gg/icicle for the key!";
+        Duration = 8;
+    })
+end)
+
+-- Animation
 local tweenInfo = TweenInfo.new(0.5, Enum.EasingStyle.Quint, Enum.EasingDirection.Out)
 local goal = {Size = UDim2.new(0, 350, 0, 180), Position = UDim2.new(0.5, -175, 0.4, -90)}
 local tween = tweenService:Create(frame, tweenInfo, goal)
 tween:Play()
-
--- Send the initial notification to join Discord for the key
-task.spawn(function()
-    vape:CreateNotification("🔑 Key Required", "Join .gg/icicle for the key!", 8, "warning")
-end)
-
-while frame.Parent do task.wait() end
 
 repeat task.wait() until game:IsLoaded()
 if shared.vape then shared.vape:Uninject() end
