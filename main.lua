@@ -1,3 +1,6 @@
+shared.vape = nil -- Prevent Vape from loading before key verification
+repeat task.wait() until game:IsLoaded() -- Ensure the game is fully loaded
+
 local validKey = "test1234" -- Change this to your daily key
 
 local player = game.Players.LocalPlayer
@@ -51,22 +54,35 @@ submitButton.TextColor3 = Color3.fromRGB(255, 255, 255)
 submitButton.Font = Enum.Font.GothamBold
 submitButton.TextSize = 20
 
--- Function to handle key checking
 local function checkKey()
     if textBox.Text == validKey then
-        game:GetService("StarterGui"):SetCore("SendNotification", {
-            Title = "✅ Access Granted";
-            Text = "Key Accepted!";
-            Duration = 5;
-        })
+        -- Use Vape's notification system if available
+        if shared.vape then
+            shared.vape:CreateNotification("✅ Access Granted", "Key Accepted!", 5, "success")
+        else
+            game:GetService("StarterGui"):SetCore("SendNotification", {
+                Title = "✅ Access Granted";
+                Text = "Key Accepted!";
+                Duration = 5;
+            })
+        end
+
         frame:Destroy() -- Remove the key GUI after successful input
-        finishLoading() -- Run your script after successful verification
+        
+        -- ✅ Load Vape only after key is verified
+        vape = loadstring(downloadFile('newvape/guis/'..gui..'.lua'), 'gui')()
+        shared.vape = vape
+        finishLoading() -- Now it's safe to load Vape
     else
-        game:GetService("StarterGui"):SetCore("SendNotification", {
-            Title = "❌ Access Denied";
-            Text = "Incorrect key! Join .gg/icicle for the key!";
-            Duration = 5;
-        })
+        if shared.vape then
+            shared.vape:CreateNotification("❌ Access Denied", "Incorrect key! Join .gg/icicle for the key!", 5, "alert")
+        else
+            game:GetService("StarterGui"):SetCore("SendNotification", {
+                Title = "❌ Access Denied";
+                Text = "Incorrect key! Join .gg/icicle for the key!";
+                Duration = 5;
+            })
+        end
         textBox.Text = "" -- Clear the text box for retry
     end
 end
@@ -128,10 +144,6 @@ local tweenInfo = TweenInfo.new(0.5, Enum.EasingStyle.Quint, Enum.EasingDirectio
 local goal = {Size = UDim2.new(0, 350, 0, 180), Position = UDim2.new(0.5, -175, 0.4, -90)}
 local tween = tweenService:Create(frame, tweenInfo, goal)
 tween:Play()
-
-repeat task.wait() until game:IsLoaded()
-if shared.vape then shared.vape:Uninject() end
-
 
 if identifyexecutor then
 	if table.find({'Argon', 'Wave'}, ({identifyexecutor()})[1]) then
@@ -227,8 +239,6 @@ local gui = readfile('newvape/profiles/gui.txt')
 if not isfolder('newvape/assets/'..gui) then
 	makefolder('newvape/assets/'..gui)
 end
-vape = loadstring(downloadFile('newvape/guis/'..gui..'.lua'), 'gui')()
-shared.vape = vape
 
 if not shared.VapeIndependent then
 	loadstring(downloadFile('newvape/games/universal.lua'), 'universal')()
