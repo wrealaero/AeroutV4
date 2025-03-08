@@ -16,14 +16,13 @@ end
 local player = game.Players.LocalPlayer
 
 if not isPlayerWhitelisted(player) then
-
-    warn(player.Name .. " your not fucking whitelisted nn lol")
+    warn(player.Name .. " is not whitelisted and cannot use the script.")
     game:GetService("StarterGui"):SetCore("SendNotification", {
-        Title = "DENIED NIGGA";
-        Text = "You're not fucking whitelisted nn lol.";
+        Title = "Access Denied";
+        Text = "You are not whitelisted to use this script.";
         Duration = 5;
     })
-    return 
+    return
 end
 
 local isfile = isfile or function(file)
@@ -45,7 +44,7 @@ local function downloadFile(path, func)
             error(res)
         end
         if path:find('.lua') then
-            res = '--This watermark is used to delete the file if its cached, remove it to make the file persist after vape updates.\n'..res
+            res = res
         end
         writefile(path, res)
     end
