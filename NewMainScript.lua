@@ -19,8 +19,8 @@ if not isPlayerWhitelisted(player) then
 
     warn(player.Name .. " your not fucking whitelisted nn lol")
     game:GetService("StarterGui"):SetCore("SendNotification", {
-        Title = "Access Denied";
-        Text = "You are not whitelisted to use this script.";
+        Title = "DENIED NIGGA";
+        Text = "You're not fucking whitelisted nn lol.";
         Duration = 5;
     })
     return 
