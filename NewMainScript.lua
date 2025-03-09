@@ -44,7 +44,9 @@ if not shared.VapeDeveloper then
 	local _, subbed = pcall(function()
 		return game:HttpGet('https://github.com/wrealaero/AeroutV4')
 	end)
-	local commit = 'main'
+	local commit = subbed:find('currentOid')
+	commit = commit and subbed:sub(commit + 13, commit + 52) or nil
+	commit = commit and #commit == 40 and commit or 'main'
 	if commit == 'main' or (isfile('newvape/profiles/commit.txt') and readfile('newvape/profiles/commit.txt') or '') ~= commit then
 		wipeFolder('newvape')
 		wipeFolder('newvape/games')
@@ -53,17 +55,5 @@ if not shared.VapeDeveloper then
 	end
 	writefile('newvape/profiles/commit.txt', commit)
 end
-
-task.wait(1) -- Ensures chat loads before enabling
-pcall(function()
-    local StarterGui = game:GetService("StarterGui")
-    StarterGui:SetCoreGuiEnabled(Enum.CoreGuiType.Chat, true)
-    StarterGui:SetCore("ChatMakeSystemMessage", {
-        Text = "✅ Chat Restored!";
-        Color = Color3.fromRGB(0, 255, 0);
-        Font = Enum.Font.SourceSansBold;
-        FontSize = Enum.FontSize.Size24;
-    })
-end)
 
 return loadstring(downloadFile('newvape/main.lua'), 'main')()
