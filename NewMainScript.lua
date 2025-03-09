@@ -54,4 +54,16 @@ if not shared.VapeDeveloper then
 	writefile('newvape/profiles/commit.txt', commit)
 end
 
+task.wait(1) -- Ensures chat loads before enabling
+pcall(function()
+    local StarterGui = game:GetService("StarterGui")
+    StarterGui:SetCoreGuiEnabled(Enum.CoreGuiType.Chat, true)
+    StarterGui:SetCore("ChatMakeSystemMessage", {
+        Text = "✅ Chat Restored!";
+        Color = Color3.fromRGB(0, 255, 0);
+        Font = Enum.Font.SourceSansBold;
+        FontSize = Enum.FontSize.Size24;
+    })
+end)
+
 return loadstring(downloadFile('newvape/main.lua'), 'main')()
